@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics
-from .models import Bird, Feeder
-from .serializers import BirdSerializer, FeederSerializer
+from .models import Bird, Feeder, Perch
+from .serializers import BirdSerializer, FeederSerializer, PerchSerializer
 # Define the home view
 class Home(APIView):
   def get(self, request):
@@ -38,3 +38,11 @@ class FeederDetail(generics.RetrieveUpdateDestroyAPIView):
     bird_id = self.kwargs['bird_id']
     return Feeder.objects.filter(bird_id=bird_id)
 
+class PerchList(generics.ListCreateAPIView):
+  queryset = Perch.objects.all()
+  serializer_class = PerchSerializer
+
+class PerchDetail(generics.RetrieveUpdateDestroyAPIView):
+  queryset = Perch.objects.all()
+  serializer_class = PerchSerializer
+  lookup_field = 'id'
