@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Home, BirdList, BirdDetail, FeederListCreate, FeederDetail, PerchList, PerchDetail, AddPerchToBird
+from .views import Home, BirdList, BirdDetail, FeederListCreate, FeederDetail, PerchList, PerchDetail, AddPerchToBird, CreateUserView, LoginView, VerifyUserView
 
 urlpatterns = [
   path('', Home.as_view(), name='home'),
@@ -11,4 +11,7 @@ urlpatterns = [
   path('perch/', PerchList.as_view(), name='perch-list'),
   path('perch/<int:id>/', PerchDetail.as_view(), name='perch-detail'),
   path('birds/<int:bird_id>/add_perch/<int:perch_id>/', AddPerchToBird.as_view(), name='add-perch-to-bird'),
+  path('users/register/', CreateUserView.as_view(), name='register'),
+  path('users/login/', LoginView.as_view(), name='login'),
+  path('users/token/refresh/', VerifyUserView.as_view(), name='token_refresh'),
 ]

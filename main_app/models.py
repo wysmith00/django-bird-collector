@@ -1,6 +1,6 @@
 from django.db import models
 from datetime import date
-
+from django.contrib.auth.models import User
 
 # A tuple of 2-tuples
 MEALS = (
@@ -24,6 +24,7 @@ class Bird(models.Model):
     description = models.TextField(max_length=250)
     age = models.IntegerField()
     perch = models.ManyToManyField(Perch)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def feeder_for_today(self):
       return self.feeder_set.filter(date=date.today()).count() >= len(MEALS)

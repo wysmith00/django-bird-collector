@@ -1,3 +1,8 @@
+import environ  
+import dj_database_url
+import django_heroku
+
+
 """
 Django settings for birdcollector project.
 
@@ -25,7 +30,30 @@ SECRET_KEY = 'django-insecure-3xrlr=d1_k7=8b3q)!l&tw)fs*@o6u#2vgt=bijm@jv05elbxq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1'] 
+ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
+
+# These are required
+DATABASE_URL=env('DATABASE_URL')
+SECRET_KEY=env('SECRET_KEY')
+
+# These are not required.
+# If you want to connect locally to the database you may need them
+# Something to be aware of, nothing more.
+
+# PGDATABASE=env('PGDATABASE')
+# PGHOST=env('PGHOST')
+# PGPASSWORD=env('PGPASSWORD')
+# PGPORT=env('PGPORT')
+# PGUSER=env('PGUSER')
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Adjust the port if your frontend runs on a different one
+]
 
 
 # Application definition
@@ -38,17 +66,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'main_app',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'birdcollector.urls'
@@ -69,23 +100,50 @@ TEMPLATES = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+}
+
 WSGI_APPLICATION = 'birdcollector.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'birdcollector',
+#         'HOST': 'localhost', 
+#         'USER': 'bird_admin',
+#         'PASSWORD': 'password', 
+#     }
+# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'birdcollector',
-        'HOST': 'localhost', 
-        'USER': 'bird_admin',
-        'PASSWORD': 'password', 
-    }
+    'default': 
+        dj_database_url.config('DATABASE_URL')
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -127,3 +185,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# catcollector/settings.py
+
+# Add this to the very bottom of your settings.py file
+# If you don't your app will not deploy properly
+django_heroku.settings(locals())
+
+
